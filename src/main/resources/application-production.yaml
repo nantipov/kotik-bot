@@ -1,3 +1,6 @@
 logging:
   level:
     org.nantipov: INFO
+
+kotik:
+  updates-scheduler-interval: PT10M

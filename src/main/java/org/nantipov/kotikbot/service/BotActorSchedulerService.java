@@ -20,7 +20,7 @@ public class BotActorSchedulerService {
         this.updatesService = updatesService;
     }
 
-    @Scheduled(fixedDelayString = "PT10S")
+    @Scheduled(fixedDelayString = "${kotik.updates-scheduler-interval}")
     public void act() {
         updateSuppliers.forEach(this::callSupplierDelivery);
         updatesService.sendActualUpdates();
