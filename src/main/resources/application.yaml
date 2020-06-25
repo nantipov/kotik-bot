@@ -1,0 +1,20 @@
+spring:
+  cache:
+    cache-names: already-delivered
+    caffeine:
+      spec: expireAfterAccess=1h
+  jackson:
+    default-property-inclusion: non_null
+    property-naming-strategy: SNAKE_CASE
+
+logging:
+  level:
+    root: INFO
+    org.nantipov: DEBUG
+
+bot:
+  name: Kotik
+  token: ${TELEGRAM_TOKEN}
+
+kotik:
+  interval-per-message-per-chat-minutes: 30
