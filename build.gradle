@@ -31,11 +31,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-json'
 
-    implementation 'org.telegram:telegrambots-spring-boot-starter:4.1.2'
+    implementation "org.telegram:telegrambots:4.9"
 
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.postgresql:postgresql'
-
 
     implementation 'com.github.ben-manes.caffeine:caffeine:2.8.4'
     implementation 'com.google.guava:guava:29.0-jre'
@@ -43,8 +42,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.13.1'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//    testImplementation 'com.h2database:h2'
-    implementation 'com.h2database:h2'
+    testImplementation 'com.h2database:h2'
 }
 
 test {

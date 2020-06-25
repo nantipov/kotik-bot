@@ -53,10 +53,10 @@ public class WikipediaSupplier implements UpdateSupplier {
 
     @Override
     public void deliver() {
-        deliverPictureOfTheDay1();
+        deliverPictureOfTheDay();
     }
 
-    private void deliverPictureOfTheDay1() {
+    private void deliverPictureOfTheDay() {
         var today = OffsetDateTime.now(ZoneId.of(ZoneOffset.UTC.getId())).truncatedTo(ChronoUnit.DAYS);
         String updateKey = "POD" + DateTimeFormatter.BASIC_ISO_DATE.format(today);
         if (updatesService.isAlreadyDelivered(SUPPLIER_ID, updateKey)) {
