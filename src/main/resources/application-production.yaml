@@ -1,4 +1,7 @@
 logging:
+  file:
+    name: kotikbot.log
+    path: ${LOGGING_PATH}
   level:
     org.nantipov: INFO
 
