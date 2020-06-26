@@ -1,7 +1,6 @@
 logging:
   file:
-    name: kotikbot.log
-    path: ${LOGGING_PATH}
+    name: "${LOGGING_PATH}/kotikbot.log"
     max-size: 2MB
   level:
     org.nantipov: INFO
