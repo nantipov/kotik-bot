@@ -2,6 +2,7 @@ logging:
   file:
     name: kotikbot.log
     path: ${LOGGING_PATH}
+    max-size: 2MB
   level:
     org.nantipov: INFO
 
