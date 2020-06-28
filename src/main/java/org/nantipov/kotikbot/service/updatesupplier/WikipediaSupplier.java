@@ -152,7 +152,8 @@ public class WikipediaSupplier implements UpdateSupplier {
         } else {
             switch (element.tag().getName().toLowerCase()) {
                 case "a":
-                    return String.format(" [%s](%s)", escapeReservedCharacters(element.text()), element.attr("href"));
+                    return String.format(" [%s](%s)", escapeReservedCharacters(element.text()),
+                                         escapeReservedCharacters(element.attr("href")));
                 case "b":
                     return "*" + escapeReservedCharacters(nullToEmpty(element.text())) +
                            htmlToMarkdown(element.children()) + "*";

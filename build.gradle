@@ -41,8 +41,9 @@ dependencies {
     implementation 'com.rometools:rome:1.13.0'
     implementation 'org.jsoup:jsoup:1.13.1'
 
+    implementation 'com.h2database:h2'
+
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'com.h2database:h2'
 }
 
 test {

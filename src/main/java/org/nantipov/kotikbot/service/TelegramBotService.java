@@ -5,7 +5,9 @@ import org.nantipov.kotikbot.config.BotProperties;
 import org.nantipov.kotikbot.domain.MessageResource;
 import org.nantipov.kotikbot.domain.SupplierMessage;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.ApiContext;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -13,8 +15,10 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.BotSession;
 
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 
 import static org.nantipov.kotikbot.domain.MessageResourceType.IMAGE;
 
@@ -28,6 +32,16 @@ public class TelegramBotService extends TelegramLongPollingBot {
     public TelegramBotService(BotProperties botProperties, CommandService commandService) {
         this.botProperties = botProperties;
         this.commandService = commandService;
+    }
+
+    @PostConstruct
+    public void init() {
+        ApiContextInitializer.init();
+        BotSession session = ApiContext.getInstance(BotSession.class);
+        session.setToken(this.getBotToken());
+        session.setOptions(this.getOptions());
+        session.setCallback(this);
+        session.start();
     }
 
     @Override
