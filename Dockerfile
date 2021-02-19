@@ -1,0 +1,8 @@
+FROM openjdk:8-jdk-slim
+
+EXPOSE 8080
+
+COPY build/libs/kotik-bot-0.0.1-SNAPSHOT.jar /service.jar
+
+USER 999
+ENTRYPOINT ["java", "-jar", "/service.jar"]

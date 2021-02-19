@@ -2,6 +2,8 @@
 
 Educational messenger bot. However, the `Telegram` is the only supported platform at the moment.
 
+Available as https://t.me/kotik_elegant_bot.
+
 ## Build
 
 ```shell script
