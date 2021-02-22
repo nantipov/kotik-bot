@@ -22,7 +22,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew build
     - name: Build a docker image
-      run: docker build . --tag kotik-bot:${{ GITHUB_RUN_ID }}
+      run: docker build . --tag kotik-bot:$GITHUB_RUN_ID
     - name: Push to Docker Hub
       uses: docker/build-push-action@v1
       with:
