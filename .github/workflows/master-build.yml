@@ -13,6 +13,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Calculate tags
+      id: calctags
+      run: |
+        DOCKER_IMAGE=nantipov/kotik-bot
+        VERSION=edge
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+        elif [[ $GITHUB_REF == refs/heads/* ]]; then
+          VERSION=$(echo ${GITHUB_REF#refs/heads/} | sed -r 's#/+#-#g')
+        elif [[ $GITHUB_REF == refs/pull/* ]]; then
+          VERSION=pr-${{ github.event.number }}
+        fi
+        TAGS="${DOCKER_IMAGE}:${VERSION}"
+        if [ "${{ github.event_name }}" = "push" ]; then
+          TAGS="$TAGS,${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}"
+        fi
+        echo ::set-output name=version::${VERSION}
+        echo ::set-output name=tags::${TAGS}
+        echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
     - name: Set up JDK 11
       uses: actions/setup-java@v1
       with:
@@ -31,6 +50,10 @@ jobs:
     - name: Push to Docker Hub
       uses: docker/build-push-action@v2
       with:
-        pull: true
-        push: true
-        tags: nantipov/kotik-bot:$GITHUB_RUN_ID,nantipov/kotik-bot:latest
+        context: .
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.calctags.outputs.tags }}
+        labels: |
+          org.opencontainers.image.source=${{ github.event.repository.html_url }}
+          org.opencontainers.image.created=${{ steps.calctags.outputs.created }}
+          org.opencontainers.image.revision=${{ github.sha }}
