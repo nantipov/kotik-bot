@@ -1,4 +1,4 @@
-name: Build and push
+name: Master build and Docker push
 
 on:
   push:
