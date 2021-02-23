@@ -17,5 +17,5 @@ bot:
   token: ${TELEGRAM_TOKEN}
 
 kotik:
-  interval-per-message-per-chat-minutes: 30
+  interval-per-message-per-chat-minutes: 2
   updates-scheduler-interval: PT10S

@@ -6,4 +6,5 @@ logging:
     org.nantipov: INFO
 
 kotik:
+  interval-per-message-per-chat-minutes: 30
   updates-scheduler-interval: PT10M
