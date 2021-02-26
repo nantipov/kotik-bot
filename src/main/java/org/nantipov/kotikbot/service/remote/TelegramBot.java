@@ -1,32 +1,29 @@
 package org.nantipov.kotikbot.service.remote;
 
+import org.nantipov.kotikbot.service.BotUpdatesProcessorService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.ApiContext;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.generics.BotSession;
 
-import java.util.function.Consumer;
-
+@Component
 public class TelegramBot extends TelegramLongPollingBot {
 
     private final String token;
     private final String name;
-    private final Consumer<Update> updateHandler;
+    private final BotUpdatesProcessorService botUpdatesProcessorService;
 
-    public TelegramBot(String token, String name, Consumer<Update> updateHandler) {
+    public TelegramBot(@Value("${telegram.token}") String token,
+                       @Value("${bot.name}") String name,
+                       BotUpdatesProcessorService botUpdatesProcessorService) {
         this.token = token;
         this.name = name;
-        this.updateHandler = updateHandler;
-        BotSession session = ApiContext.getInstance(BotSession.class);
-        session.setToken(token);
-        session.setOptions(this.getOptions());
-        session.setCallback(this);
-        session.start();
+        this.botUpdatesProcessorService = botUpdatesProcessorService;
     }
 
     @Override
     public void onUpdateReceived(Update update) {
-        updateHandler.accept(update);
+        botUpdatesProcessorService.processUpdate(update);
     }
 
     @Override

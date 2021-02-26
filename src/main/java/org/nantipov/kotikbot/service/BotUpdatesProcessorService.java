@@ -4,11 +4,11 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Service
-public class BotUpdatesProcessor {
+public class BotUpdatesProcessorService {
 
     private final CommandService commandService;
 
-    public BotUpdatesProcessor(CommandService commandService) {
+    public BotUpdatesProcessorService(CommandService commandService) {
         this.commandService = commandService;
     }
 

@@ -14,7 +14,7 @@ import javax.persistence.OneToMany;
 @NoArgsConstructor
 public class Chat {
     @Id
-    private long chatId;
+    private Long chatId;
 
     private OffsetDateTime receivedAt;
     private OffsetDateTime postedAt;

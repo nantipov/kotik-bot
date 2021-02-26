@@ -1,2 +1,3 @@
-bot:
+telegram:
   token: test-token
+telegrambots.enabled: false

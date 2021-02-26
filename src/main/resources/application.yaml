@@ -14,8 +14,9 @@ logging:
 
 bot:
   name: Kotik
+telegram:
   token: ${TELEGRAM_TOKEN}
 
 kotik:
-  interval-per-message-per-chat-minutes: 2
+  interval-per-message-per-chat-minutes: 0
   updates-scheduler-interval: PT10S
