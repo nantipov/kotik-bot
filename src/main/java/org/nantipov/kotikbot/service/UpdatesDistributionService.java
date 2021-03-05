@@ -4,12 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.nantipov.kotikbot.domain.SupplierMessage;
-import org.nantipov.kotikbot.domain.entity.Chat;
 import org.nantipov.kotikbot.domain.entity.CollectedUpdate;
 import org.nantipov.kotikbot.domain.entity.DistributedUpdate;
-import org.nantipov.kotikbot.respository.ChatRepository;
+import org.nantipov.kotikbot.domain.entity.Room;
 import org.nantipov.kotikbot.respository.CollectedUpdateRepository;
 import org.nantipov.kotikbot.respository.DistributedUpdateRepository;
+import org.nantipov.kotikbot.respository.RoomRepository;
+import org.nantipov.kotikbot.service.telegram.TelegramBotService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -19,24 +20,24 @@ import java.time.OffsetDateTime;
 
 @Slf4j
 @Service
-public class UpdatesService {
+public class UpdatesDistributionService {
 
     private final CollectedUpdateRepository collectedUpdateRepository;
-    private final ChatRepository chatRepository;
+    private final RoomRepository roomRepository;
     private final DistributedUpdateRepository distributedUpdateRepository;
     private final ObjectMapper objectMapper;
     private final TelegramBotService telegramBotService;
     private final int intervalPerMessagePerChatMinutes;
 
-    public UpdatesService(CollectedUpdateRepository collectedUpdateRepository,
-                          ChatRepository chatRepository,
-                          DistributedUpdateRepository distributedUpdateRepository,
-                          ObjectMapper objectMapper,
-                          TelegramBotService telegramBotService,
-                          @Value("${kotik.interval-per-message-per-chat-minutes}")
-                                  int intervalPerMessagePerChatMinutes) {
+    public UpdatesDistributionService(CollectedUpdateRepository collectedUpdateRepository,
+                                      RoomRepository roomRepository,
+                                      DistributedUpdateRepository distributedUpdateRepository,
+                                      ObjectMapper objectMapper,
+                                      TelegramBotService telegramBotService,
+                                      @Value("${kotik.interval-per-message-per-chat-minutes}")
+                                              int intervalPerMessagePerChatMinutes) {
         this.collectedUpdateRepository = collectedUpdateRepository;
-        this.chatRepository = chatRepository;
+        this.roomRepository = roomRepository;
         this.distributedUpdateRepository = distributedUpdateRepository;
         this.objectMapper = objectMapper;
         this.telegramBotService = telegramBotService;
@@ -68,7 +69,7 @@ public class UpdatesService {
     }
 
     private void sendUpdateToUnreachedChats(CollectedUpdate update) {
-        var unreachedChats = chatRepository.findUnreachedChats(update.getId());
+        var unreachedChats = roomRepository.findUnreachedChats(update.getId());
         if (unreachedChats.isEmpty()) {
             return;
         }
@@ -80,23 +81,33 @@ public class UpdatesService {
                                               .plusMinutes(intervalPerMessagePerChatMinutes)
                                               .isBefore(OffsetDateTime.now())
                           )
-                          .forEach(chat -> sendUpdateToUnreachedChat(chat, update, message));
+                          .forEach(room -> sendUpdateToUnreachedChat(room, update, message));
         } catch (JsonProcessingException e) {
             log.error("Could not deserialize JSON {}", update.getMessageJson(), e);
         }
     }
 
-    private void sendUpdateToUnreachedChat(Chat chat, CollectedUpdate update, SupplierMessage message) {
-        try {
-            telegramBotService.sendSupplierMessage(message, chat.getChatId());
-            var distributedUpdate = new DistributedUpdate();
-            distributedUpdate.setChat(chat);
-            distributedUpdate.setCollectedUpdate(update);
-            distributedUpdateRepository.save(distributedUpdate);
-            chat.setPostedAt(OffsetDateTime.now());
-            chatRepository.save(chat);
-        } catch (TelegramApiException e) {
-            log.error("Could not send Telegram message", e);
+    private void sendUpdateToUnreachedChat(Room room, CollectedUpdate update, SupplierMessage message) {
+        sendMessage(room, message);
+        var distributedUpdate = new DistributedUpdate();
+        distributedUpdate.setRoom(room);
+        distributedUpdate.setCollectedUpdate(update);
+        distributedUpdateRepository.save(distributedUpdate);
+        room.setPostedAt(OffsetDateTime.now());
+        roomRepository.save(room);
+    }
+
+    private void sendMessage(Room room, SupplierMessage message) { //TODO visitor?
+        switch (room.getProvider()) {
+            case TELEGRAM:
+                try {
+                    telegramBotService.sendSupplierMessage(message, room.getProviderRoomKey());
+                } catch (TelegramApiException e) {
+                    log.error("Could not send Telegram message, skipped", e); //TODO skipped?
+                }
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown provider");
         }
     }
 }

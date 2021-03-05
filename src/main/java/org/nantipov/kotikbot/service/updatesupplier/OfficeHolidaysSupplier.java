@@ -3,7 +3,7 @@ package org.nantipov.kotikbot.service.updatesupplier;
 import lombok.extern.slf4j.Slf4j;
 import org.nantipov.kotikbot.domain.SupplierMessage;
 import org.nantipov.kotikbot.service.FeedService;
-import org.nantipov.kotikbot.service.UpdatesService;
+import org.nantipov.kotikbot.service.UpdatesDistributionService;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -22,10 +22,10 @@ public class OfficeHolidaysSupplier implements UpdateSupplier {
     private static final String SUPPLIER_ID = "OfficeHolidaysSupplier";
     private static final String FEED_URL = "https://www.officeholidays.com/rss/all_holidays";
 
-    private final UpdatesService updatesService;
+    private final UpdatesDistributionService updatesService;
     private final FeedService feedService;
 
-    public OfficeHolidaysSupplier(UpdatesService updatesService, FeedService feedService) {
+    public OfficeHolidaysSupplier(UpdatesDistributionService updatesService, FeedService feedService) {
         this.updatesService = updatesService;
         this.feedService = feedService;
     }

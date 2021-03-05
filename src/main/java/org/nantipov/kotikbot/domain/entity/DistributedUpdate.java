@@ -20,8 +20,8 @@ public class DistributedUpdate {
     private OffsetDateTime createdAt = OffsetDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "chat_id")
-    private Chat chat;
+    @JoinColumn(name = "room_id")
+    private Room room;
 
     @ManyToOne
     @JoinColumn(name = "collected_update_id")

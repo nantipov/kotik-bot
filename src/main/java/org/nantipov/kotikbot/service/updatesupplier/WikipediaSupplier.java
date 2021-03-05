@@ -16,7 +16,7 @@ import org.nantipov.kotikbot.domain.MessageResource;
 import org.nantipov.kotikbot.domain.MessageResourceType;
 import org.nantipov.kotikbot.domain.SupplierMessage;
 import org.nantipov.kotikbot.service.FeedService;
-import org.nantipov.kotikbot.service.UpdatesService;
+import org.nantipov.kotikbot.service.UpdatesDistributionService;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -43,10 +43,10 @@ public class WikipediaSupplier implements UpdateSupplier {
     private static final String WIKI_BASE_URL = "https://commons.wikimedia.org";
     private static final String POD_DESCRIPTION_TYPE = "html";
 
-    private final UpdatesService updatesService;
+    private final UpdatesDistributionService updatesService;
     private final FeedService feedService;
 
-    public WikipediaSupplier(UpdatesService updatesService, FeedService feedService) {
+    public WikipediaSupplier(UpdatesDistributionService updatesService, FeedService feedService) {
         this.updatesService = updatesService;
         this.feedService = feedService;
     }

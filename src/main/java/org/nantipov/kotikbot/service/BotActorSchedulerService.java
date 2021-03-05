@@ -12,10 +12,10 @@ import java.util.List;
 public class BotActorSchedulerService {
 
     private final List<UpdateSupplier> updateSuppliers;
-    private final UpdatesService updatesService;
+    private final UpdatesDistributionService updatesService;
 
     public BotActorSchedulerService(List<UpdateSupplier> updateSuppliers,
-                                    UpdatesService updatesService) {
+                                    UpdatesDistributionService updatesService) {
         this.updateSuppliers = updateSuppliers;
         this.updatesService = updatesService;
     }

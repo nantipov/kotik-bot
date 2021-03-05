@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kotik-bot-deployment
+  labels:
+    app: kotik-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kotik-bot
+  template:
+    metadata:
+      labels:
+        app: kotik-bot
+    spec:
+      containers:
+        - name: kotik-bot
+          image: nantipov/kotik-bot:master
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: production
+            - name: TELEGRAM_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: kotik-bot-secrets
+                  key: telegram_token
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: kotik-bot-secrets
+                  key: db_url
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: kotik-bot-secrets
+                  key: db_username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: kotik-bot-secrets
+                  key: db_password
+            - name: LOGGING_PATH
+              value: /tmp

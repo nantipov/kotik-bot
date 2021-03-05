@@ -1,6 +1,5 @@
-package org.nantipov.kotikbot.service.remote;
+package org.nantipov.kotikbot.service.telegram;
 
-import org.nantipov.kotikbot.service.BotUpdatesProcessorService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -23,7 +22,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        botUpdatesProcessorService.processUpdate(update);
+        var response = botUpdatesProcessorService.processUpdate(update);
     }
 
     @Override

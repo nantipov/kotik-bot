@@ -1,9 +1,8 @@
-package org.nantipov.kotikbot.service;
+package org.nantipov.kotikbot.service.telegram;
 
 import lombok.extern.slf4j.Slf4j;
 import org.nantipov.kotikbot.domain.MessageResource;
 import org.nantipov.kotikbot.domain.SupplierMessage;
-import org.nantipov.kotikbot.service.remote.TelegramBot;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMediaGroup;
@@ -32,17 +31,9 @@ public class TelegramBotService {
         this.telegramBot = telegramBot;
     }
 
-    public void sayThatIAmTyping(long chatId) {
-        try {
-            telegramBot.execute(new SendChatAction(String.valueOf(chatId), "typing"));
-        } catch (TelegramApiException e) {
-            log.warn("Could not send 'typing' event", e);
-        }
-    }
-
-    public void sendSupplierMessage(SupplierMessage supplierMessage, long chatId) throws TelegramApiException {
-        sayThatIAmTyping(chatId);
-        var sendMessage = new SendMessage(String.valueOf(chatId), supplierMessage.getMarkdownText());
+    public void sendSupplierMessage(SupplierMessage supplierMessage, String providerRoomKey) throws TelegramApiException {
+        sayThatIAmTyping(providerRoomKey);
+        var sendMessage = new SendMessage(String.valueOf(providerRoomKey), supplierMessage.getMarkdownText());
         sendMessage.setParseMode("MarkdownV2"); //TODO html also?
         telegramBot.execute(sendMessage);
         if (!supplierMessage.getResources().isEmpty()) {
@@ -52,7 +43,7 @@ public class TelegramBotService {
                     case IMAGE:
                         try (var stream = new TelegramInputFileResource(res)) {
                             var sendPhoto = SendPhoto.builder()
-                                                     .chatId(String.valueOf(chatId))
+                                                     .chatId(String.valueOf(providerRoomKey))
                                                      .photo(stream.getTelegramFile())
                                                      .caption(res.getCaption())
                                                      .build();
@@ -67,9 +58,17 @@ public class TelegramBotService {
                                                     .stream()
                                                     .map(this::getTelegramMedia)
                                                     .collect(Collectors.toList());
-                var sendMediaGroup = new SendMediaGroup(String.valueOf(chatId), mediaResources);
+                var sendMediaGroup = new SendMediaGroup(String.valueOf(providerRoomKey), mediaResources);
                 telegramBot.execute(sendMediaGroup);
             }
+        }
+    }
+
+    private void sayThatIAmTyping(String chatId) {
+        try {
+            telegramBot.execute(new SendChatAction(chatId, "typing"));
+        } catch (TelegramApiException e) {
+            log.warn("Could not send 'typing' event", e);
         }
     }
 
