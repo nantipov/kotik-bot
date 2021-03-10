@@ -32,7 +32,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-json'
 
     implementation 'org.telegram:telegrambots:5.0.1.1'
-    implementation 'org.telegram:telegrambots-spring-boot-starter:5.0.1.1'
+    implementation 'org.telegram:telegrambots-spring-boot-starter:5.1.0'
 
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.postgresql:postgresql'
