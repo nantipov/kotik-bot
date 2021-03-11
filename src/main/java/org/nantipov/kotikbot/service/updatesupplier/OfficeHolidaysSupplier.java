@@ -1,6 +1,9 @@
 package org.nantipov.kotikbot.service.updatesupplier;
 
 import lombok.extern.slf4j.Slf4j;
+import org.nantipov.kotikbot.domain.CollectedMessage;
+import org.nantipov.kotikbot.domain.CollectedMessages;
+import org.nantipov.kotikbot.domain.RoomLanguage;
 import org.nantipov.kotikbot.domain.SupplierMessage;
 import org.nantipov.kotikbot.service.FeedService;
 import org.nantipov.kotikbot.service.UpdatesDistributionService;
@@ -11,6 +14,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 
 import static org.nantipov.kotikbot.service.Utils.escapeReservedCharacters;
@@ -44,7 +48,10 @@ public class OfficeHolidaysSupplier implements UpdateSupplier {
         holiday(today)
                 .ifPresent(message ->
                                    updatesService.storeUpdate(
-                                           SUPPLIER_ID, updateKey, today.plusHours(23).plusMinutes(59), message
+                                           SUPPLIER_ID, updateKey, today.plusHours(23).plusMinutes(59),
+                                           new CollectedMessages(
+                                                   List.of(new CollectedMessage(RoomLanguage.EN, message))
+                                           )
                                    )
                 );
     }

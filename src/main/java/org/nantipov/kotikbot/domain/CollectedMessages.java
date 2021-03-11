@@ -4,11 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MessageResource {
-    private MessageResourceType type;
-    private String url;
-    private String caption;
+public class CollectedMessages {
+    List<CollectedMessage> messages;
 }

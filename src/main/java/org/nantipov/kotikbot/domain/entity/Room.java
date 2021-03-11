@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Version;
 
 @Data
 @Entity
@@ -31,6 +32,11 @@ public class Room {
 
     @OneToMany(mappedBy = "room")
     private List<DistributedUpdate> distributedUpdates;
+
+    private String settingsJson;
+
+    @Version
+    private long version;
 
     public Room(RoomProvider provider, String key) {
         this.provider = provider;

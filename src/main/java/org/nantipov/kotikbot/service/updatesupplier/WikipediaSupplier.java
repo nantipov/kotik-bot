@@ -12,10 +12,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.PseudoTextElement;
 import org.jsoup.select.Elements;
+import org.nantipov.kotikbot.domain.CollectedMessage;
+import org.nantipov.kotikbot.domain.CollectedMessages;
 import org.nantipov.kotikbot.domain.MessageResource;
 import org.nantipov.kotikbot.domain.MessageResourceType;
+import org.nantipov.kotikbot.domain.RoomLanguage;
 import org.nantipov.kotikbot.domain.SupplierMessage;
 import org.nantipov.kotikbot.service.FeedService;
+import org.nantipov.kotikbot.service.TranslationsService;
 import org.nantipov.kotikbot.service.UpdatesDistributionService;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +29,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -39,16 +44,19 @@ public class WikipediaSupplier implements UpdateSupplier {
     private static final String SUPPLIER_ID = "WikipediaSupplier";
 
     private static final String WIKI_ATOM_POD =
-            "https://commons.wikimedia.org/w/api.php?action=featuredfeed&feed=potd&feedformat=atom&language=en";
+            "https://commons.wikimedia.org/w/api.php?action=featuredfeed&feed=potd&feedformat=atom&language=%s";
     private static final String WIKI_BASE_URL = "https://commons.wikimedia.org";
     private static final String POD_DESCRIPTION_TYPE = "html";
 
     private final UpdatesDistributionService updatesService;
     private final FeedService feedService;
+    private final TranslationsService translationsService;
 
-    public WikipediaSupplier(UpdatesDistributionService updatesService, FeedService feedService) {
+    public WikipediaSupplier(UpdatesDistributionService updatesService, FeedService feedService,
+                             TranslationsService translationsService) {
         this.updatesService = updatesService;
         this.feedService = feedService;
+        this.translationsService = translationsService;
     }
 
     @Override
@@ -62,22 +70,30 @@ public class WikipediaSupplier implements UpdateSupplier {
         if (updatesService.isAlreadyDelivered(SUPPLIER_ID, updateKey)) {
             return;
         }
-        feedService.feed(WIKI_ATOM_POD, FeedService.TODAY_ENTRIES, this::podMessage)
-                   .findAny()
-                   .ifPresent(message ->
-                                      updatesService.storeUpdate(
-                                              SUPPLIER_ID, updateKey, today.plusHours(23).plusMinutes(59), message
-                                      )
-                   );
+        var collectedMessagesList = Arrays.stream(RoomLanguage.values())
+                                          .flatMap(this::getPictureOfTheDayMessages)
+                                          .collect(Collectors.toList());
+        if (!collectedMessagesList.isEmpty()) {
+            updatesService.storeUpdate(
+                    SUPPLIER_ID, updateKey, today.plusHours(23).plusMinutes(59),
+                    new CollectedMessages(collectedMessagesList)
+            );
+        }
     }
 
-    private SupplierMessage podMessage(SyndEntry syndEntry) {
+    private Stream<CollectedMessage> getPictureOfTheDayMessages(RoomLanguage language) {
+        return feedService.feed(String.format(WIKI_ATOM_POD, language.name().toLowerCase()),
+                                FeedService.TODAY_ENTRIES, entry -> podMessage(entry, language))
+                          .map(supplierMessage -> new CollectedMessage(language, supplierMessage));
+    }
+
+    private SupplierMessage podMessage(SyndEntry syndEntry, RoomLanguage language) {
         var description = syndEntry.getDescription();
         if (description != null && POD_DESCRIPTION_TYPE.equals(description.getType())) {
             var doc = Jsoup.parseBodyFragment(description.getValue());
             var message = new SupplierMessage();
             message.setMarkdownText(
-                    "* Wikipedia :: _Picture Of The Day_ :: " +
+                    "* " + translationsService.translation("supplier.wiki-potd.head", language.getLocale()) + " " +
                     escapeReservedCharacters(DateTimeFormatter.ISO_LOCAL_DATE.format(OffsetDateTime.now())) + " *"
             );
             addPODDescription(message, doc);

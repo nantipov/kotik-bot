@@ -1,6 +1,6 @@
 package org.nantipov.kotikbot.domain;
 
-public enum UserRequestType {
+public enum RoomQueryType {
     ACTION,
-    QUERY;
+    REQUEST;
 }
