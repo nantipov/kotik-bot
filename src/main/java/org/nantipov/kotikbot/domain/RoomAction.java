@@ -4,10 +4,10 @@ import java.util.Arrays;
 
 public enum RoomAction {
     START("Start conversation"),
-    //    LANGUAGES("Setup languages - ex. /languages rus,eng"),
+    LANGUAGES("Setup languages - ex. /languages rus eng"),
     ENG("Change main language to English"),
     RUS("Сменить основной язык на Русский"),
-    TIMEZONE("Timezone - <City>"),
+    //    TIMEZONE("Timezone - <City>"),
     UNKNOWN("n/a");
 
     String description;

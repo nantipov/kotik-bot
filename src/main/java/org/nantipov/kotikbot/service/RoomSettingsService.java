@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -49,9 +50,29 @@ public class RoomSettingsService {
         }
     }
 
-    public synchronized void setFirstLanguage(long roomId, RoomLanguage language) {
+    public void setFirstLanguage(long roomId, RoomLanguage language) {
+        var oldSettings = getSettings(roomId);
+        var languagesMod = new ArrayList<>(oldSettings.getLanguages());
+        languagesMod.remove(language);
+        languagesMod.add(0, language);
+        var newSettings = oldSettings.toBuilder()
+                                     .languages(languagesMod)
+                                     .build();
+        var room =
+                roomRepository.findById(roomId)
+                              .orElseThrow(() -> new IllegalArgumentException("Save settings for non existing room"));
+
+        room.setSettingsJson(writeSettings(newSettings)); //TODO hibernate type adapter
+        roomRepository.save(room);
+    }
+
+    public RoomLanguage getFirstLanguage(long roomId) {
+        return getSettings(roomId).getLanguages().get(0);
+    }
+
+    public void setLanguages(long roomId, List<RoomLanguage> languages) {
         var newSettings = getSettings(roomId).toBuilder()
-                                             .languages(List.of(language)) //TODO work with list
+                                             .languages(languages)
                                              .build();
         var room =
                 roomRepository.findById(roomId)

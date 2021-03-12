@@ -21,7 +21,6 @@ public class CollectedUpdate {
     private OffsetDateTime actualTill;
     private String supplier;
     private String updateKey;
-    private String messageJson;
     private String messagesJson;
 
     @OneToMany(mappedBy = "collectedUpdate")

@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Locale;
 
 public enum RoomLanguage {
-    EN("English", Locale.ENGLISH, List.of("en", "eng")),
-    RU("Русский", Locale.forLanguageTag("ru-RU"), List.of("ru", "rus", "ру", "рус"));
+    EN("English", Locale.ENGLISH, List.of("eng")),
+    RU("Русский", Locale.forLanguageTag("ru-RU"), List.of("rus", "ру", "рус"));
 
     String displayName;
     Locale locale;
@@ -26,6 +26,10 @@ public enum RoomLanguage {
 
     public Locale getLocale() {
         return locale;
+    }
+
+    public List<String> getAliases() {
+        return aliases;
     }
 
     public static RoomLanguage findLanguage(String text) {

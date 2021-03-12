@@ -108,7 +108,7 @@ public class UpdatesDistributionService {
                                    )
                           );
         } catch (JsonProcessingException e) {
-            log.error("Could not deserialize JSON {}", update.getMessageJson(), e);
+            log.error("Could not deserialize JSON {}", update.getMessagesJson(), e);
         }
     }
 
