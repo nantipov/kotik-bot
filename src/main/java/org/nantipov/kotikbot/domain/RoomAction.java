@@ -5,8 +5,9 @@ import java.util.Arrays;
 public enum RoomAction {
     START("Start conversation"),
     LANGUAGES("Setup languages - ex. /languages rus eng"),
-    ENG("Change main language to English"),
-    RUS("Сменить основной язык на Русский"),
+    ENG("Change the first language to English"),
+    RUS("Сменить первый язык на Русский"),
+    HELP("Help message"),
     //    TIMEZONE("Timezone - <City>"),
     UNKNOWN("n/a");
 
