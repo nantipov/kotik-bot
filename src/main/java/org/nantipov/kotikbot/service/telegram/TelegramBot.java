@@ -53,7 +53,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                                           sendSupplierMessage(response.getMessage(), response.getProviderRoomKey());
                                       } catch (TelegramApiException e) {
                                           log.warn(
-                                                  "Could not delivery message to chat {}",
+                                                  "Could not deliver message to chat {}",
                                                   response.getProviderRoomKey(), e
                                           );
                                       }
@@ -76,6 +76,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (supplierMessage.getResources().size() != 1) {
             var sendMessage = new SendMessage(String.valueOf(providerRoomKey), supplierMessage.getMarkdownText());
             sendMessage.setParseMode("MarkdownV2"); //TODO html also?
+            execute(sendMessage);
         }
         if (!supplierMessage.getResources().isEmpty()) {
             if (supplierMessage.getResources().size() < 2) {
