@@ -67,7 +67,6 @@ public class UpdatesDistributionService {
             update.setSupplier(supplierId);
             update.setUpdateKey(updateKey);
             update.setActualTill(actualTill);
-            update.setMessageJson(objectMapper.writeValueAsString(new SupplierMessage()));//TODO backward compatibility
             update.setMessagesJson(objectMapper.writeValueAsString(collectedMessages));
             collectedUpdateRepository.save(update);
         } catch (JsonProcessingException e) {
