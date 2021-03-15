@@ -31,7 +31,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-json'
 
-    implementation 'org.telegram:telegrambots:5.1.0'
+    implementation 'org.telegram:telegrambots:5.1.1'
     implementation 'org.telegram:telegrambots-spring-boot-starter:5.1.0'
 
     implementation 'org.flywaydb:flyway-core'
