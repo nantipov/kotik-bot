@@ -24,6 +24,7 @@ import org.nantipov.kotikbot.service.UpdatesDistributionService;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -47,6 +48,8 @@ public class WikipediaSupplier implements UpdateSupplier {
             "https://commons.wikimedia.org/w/api.php?action=featuredfeed&feed=potd&feedformat=atom&language=%s";
     private static final String WIKI_BASE_URL = "https://commons.wikimedia.org";
     private static final String POD_DESCRIPTION_TYPE = "html";
+
+    private static final Duration POD_FEEDS_COMPLETION_TIMEOUT = Duration.ofHours(5);
 
     private final UpdatesDistributionService updatesService;
     private final FeedService feedService;
@@ -73,6 +76,21 @@ public class WikipediaSupplier implements UpdateSupplier {
         var collectedMessagesList = Arrays.stream(RoomLanguage.values())
                                           .flatMap(this::getPictureOfTheDayMessages)
                                           .collect(Collectors.toList());
+
+        var collectedLanguages = collectedMessagesList.stream()
+                                                      .map(CollectedMessage::getLanguage)
+                                                      .collect(Collectors.toSet());
+
+        if (collectedLanguages.size() < RoomLanguage.values().length &&
+            Duration.between(
+                    today,
+                    OffsetDateTime.now(ZoneId.of(ZoneOffset.UTC.getId()))
+            ).compareTo(POD_FEEDS_COMPLETION_TIMEOUT) < 0
+        ) {
+            // wait until feeds in all languages are available within a certain time interval
+            return;
+        }
+
         if (!collectedMessagesList.isEmpty()) {
             updatesService.storeUpdate(
                     SUPPLIER_ID, updateKey, today.plusHours(23).plusMinutes(59),
