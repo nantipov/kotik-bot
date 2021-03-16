@@ -1,5 +1,7 @@
 # kotik-bot
 
+![kotik logo](readmeresources/kotik-logo.jpg "Kotik's logo")
+
 Educational messenger bot. However, the `Telegram` is the only supported platform at the moment.
 
 Available as https://t.me/kotik_elegant_bot.
