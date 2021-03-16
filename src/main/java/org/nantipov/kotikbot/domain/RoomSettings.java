@@ -11,4 +11,5 @@ import java.util.List;
 public class RoomSettings {
     List<RoomLanguage> languages;
     ZoneId timeZoneId;
+    Boolean acceptBetaFeatures;
 }

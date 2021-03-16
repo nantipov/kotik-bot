@@ -7,7 +7,8 @@ public enum RoomAction {
     LANGUAGES("Setup languages - ex. /languages rus eng"),
     ENG("Change the first language to English"),
     RUS("Сменить первый язык на Русский"),
-    HELP("Help message"),
+    BETA("I accept beta features"),
+    //    HELP("Help message"),
     //    TIMEZONE("Timezone - <City>"),
     UNKNOWN("n/a");
 

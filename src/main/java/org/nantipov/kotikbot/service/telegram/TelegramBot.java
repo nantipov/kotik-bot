@@ -18,6 +18,7 @@ import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,6 +52,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                                   .ifPresent(response -> {
                                       try {
                                           sendSupplierMessage(response.getMessage(), response.getProviderRoomKey());
+                                      } catch (TelegramApiRequestException re) {
+                                          log.warn(
+                                                  "Could not deliver message to chat {}: {} / {} / {}",
+                                                  response.getProviderRoomKey(), re.getErrorCode(),
+                                                  re.getApiResponse(), re.getParameters(), re
+                                          );
                                       } catch (TelegramApiException e) {
                                           log.warn(
                                                   "Could not deliver message to chat {}",

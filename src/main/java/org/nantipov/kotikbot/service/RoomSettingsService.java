@@ -22,6 +22,7 @@ public class RoomSettingsService {
             RoomSettings.builder()
                         .languages(List.of(RoomLanguage.EN))
                         .timeZoneId(ZoneId.of("UTC"))
+                        .acceptBetaFeatures(false)
                         .build();
 
     private final RoomRepository roomRepository;
@@ -67,12 +68,38 @@ public class RoomSettingsService {
     }
 
     public RoomLanguage getFirstLanguage(long roomId) {
-        return getSettings(roomId).getLanguages().get(0);
+        var languages = getSettings(roomId).getLanguages();
+        if (languages != null && !languages.isEmpty()) {
+            return languages.get(0);
+        } else {
+            return DEFAULT_SETTINGS.getLanguages().get(0);
+        }
+    }
+
+    public List<RoomLanguage> getLanguages(long roomId) {
+        var languages = getSettings(roomId).getLanguages();
+        if (languages != null && !languages.isEmpty()) {
+            return languages;
+        } else {
+            return DEFAULT_SETTINGS.getLanguages();
+        }
     }
 
     public void setLanguages(long roomId, List<RoomLanguage> languages) {
         var newSettings = getSettings(roomId).toBuilder()
                                              .languages(languages)
+                                             .build();
+        var room =
+                roomRepository.findById(roomId)
+                              .orElseThrow(() -> new IllegalArgumentException("Save settings for non existing room"));
+
+        room.setSettingsJson(writeSettings(newSettings)); //TODO hibernate type adapter
+        roomRepository.save(room);
+    }
+
+    public void setBeta(long roomId, boolean isEnabled) {
+        var newSettings = getSettings(roomId).toBuilder()
+                                             .acceptBetaFeatures(isEnabled)
                                              .build();
         var room =
                 roomRepository.findById(roomId)

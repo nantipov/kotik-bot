@@ -18,6 +18,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Strings.nullToEmpty;
+
 @Service
 public class RoomRequestService {
 
@@ -28,6 +30,8 @@ public class RoomRequestService {
             PREDICATE_IS_ACTION.and(roomQuery -> roomQuery.getAction() == RoomAction.RUS);
     private static final Predicate<RoomQuery> PREDICATE_IS_LANGUAGES =
             PREDICATE_IS_ACTION.and(roomQuery -> roomQuery.getAction() == RoomAction.LANGUAGES);
+    private static final Predicate<RoomQuery> PREDICATE_IS_BETA =
+            PREDICATE_IS_ACTION.and(roomQuery -> roomQuery.getAction() == RoomAction.BETA);
 
     private final RoomSettingsService roomSettingsService;
     private final TranslationsService translationsService;
@@ -36,7 +40,8 @@ public class RoomRequestService {
     private final List<ProcessingRoute> routes = List.of(
             ProcessingRoute.of(PREDICATE_IS_ENG, query -> changeFirstLanguageHandler(query, RoomLanguage.EN)),
             ProcessingRoute.of(PREDICATE_IS_RUS, query -> changeFirstLanguageHandler(query, RoomLanguage.RU)),
-            ProcessingRoute.of(PREDICATE_IS_LANGUAGES, this::changeLanguagesHandler)
+            ProcessingRoute.of(PREDICATE_IS_LANGUAGES, this::changeLanguagesHandler),
+            ProcessingRoute.of(PREDICATE_IS_BETA, this::changeBetaFlag)
     );
 
     public RoomRequestService(RoomSettingsService roomSettingsService,
@@ -53,6 +58,32 @@ public class RoomRequestService {
                      .filter(route -> route.getRulePredicate().test(roomQuery))
                      .map(route -> route.getHandler().apply(roomQuery))
                      .findFirst();
+    }
+
+    private RoomQueryResponse changeBetaFlag(RoomQuery query) {
+        var room = //TODO rework
+                roomRepository.findById(query.getRoomId())
+                              .orElseThrow(() -> new IllegalArgumentException(
+                                      "Unknown room " + query.getRoomId())
+                              );
+        var firstLanguage = roomSettingsService.getFirstLanguage(query.getRoomId());
+        var responseMessage = new SupplierMessage();
+        if (!query.getArgs().isEmpty() &&
+            nullToEmpty(query.getArgs().get(0)).trim().equalsIgnoreCase("off")) {
+            roomSettingsService.setBeta(query.getRoomId(), false);
+            responseMessage.setMarkdownText(translationsService.translation(
+                    "settings.beta_disabled", firstLanguage.getLocale()
+            ));
+        } else {
+            roomSettingsService.setBeta(query.getRoomId(), true);
+            responseMessage.setMarkdownText(translationsService.translation(
+                    "settings.beta_enabled", firstLanguage.getLocale()
+            ));
+        }
+        return RoomQueryResponse.builder()
+                                .providerRoomKey(room.getProviderRoomKey())
+                                .message(responseMessage)
+                                .build();
     }
 
     private RoomQueryResponse changeFirstLanguageHandler(RoomQuery query, RoomLanguage language) {
