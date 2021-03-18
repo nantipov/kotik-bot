@@ -4,6 +4,8 @@
 
 Educational messenger bot. However, the `Telegram` is the only supported platform at the moment.
 
+Kotik brings things for discussion or something that is simply good to know. 
+
 Available as https://t.me/kotik_elegant_bot.
 
 ## Build
@@ -22,3 +24,7 @@ Classical spring configuration.
 * `SPRING_DATASOURCE_URL`
 * `SPRING_DATASOURCE_PASSWORD`
 * `SPRING_DATASOURCE_USERNAME`
+
+## Look
+
+![kotik in action](readmeresources/kotik-screenhost-20210318.png "Kotik in action")
