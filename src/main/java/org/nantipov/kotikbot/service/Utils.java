@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
-    private static final Set MARKDOWN_RESERVED_CHARACTERS = Sets.newHashSet(
+    private static final Set<Character> MARKDOWN_RESERVED_CHARACTERS = Sets.newHashSet(
             '_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'
     );
 
