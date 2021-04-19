@@ -78,7 +78,7 @@ public class WikipediaSupplier implements UpdateSupplier {
                                           .collect(Collectors.toList());
 
         var collectedLanguages = collectedMessagesList.stream()
-                                                      .map(CollectedMessage::getLanguage)
+                                                      .map(CollectedMessage::language)
                                                       .collect(Collectors.toSet());
 
         if (collectedLanguages.size() < RoomLanguage.values().length &&
@@ -102,7 +102,7 @@ public class WikipediaSupplier implements UpdateSupplier {
     private Stream<CollectedMessage> getPictureOfTheDayMessages(RoomLanguage language) {
         return feedService.feed(String.format(WIKI_ATOM_POD, language.name().toLowerCase()),
                                 FeedService.TODAY_ENTRIES, entry -> podMessage(entry, language))
-                          .map(supplierMessage -> new CollectedMessage(language, supplierMessage));
+                          .map(supplierMessage -> new CollectedMessage(language, false, supplierMessage));
     }
 
     private SupplierMessage podMessage(SyndEntry syndEntry, RoomLanguage language) {
@@ -184,19 +184,15 @@ public class WikipediaSupplier implements UpdateSupplier {
         if (element instanceof PseudoTextElement) {
             return escapeReservedCharacters(element.text());
         } else {
-            switch (element.tag().getName().toLowerCase()) {
-                case "a":
-                    return String.format(" [%s](%s)", escapeReservedCharacters(element.text()),
-                                         escapeReservedCharacters(element.attr("href")));
-                case "b":
-                    return "*" + escapeReservedCharacters(nullToEmpty(element.text())) +
-                           htmlToMarkdown(element.children()) + "*";
-                case "i":
-                    return "_" + escapeReservedCharacters(nullToEmpty(element.text())) +
-                           htmlToMarkdown(element.children()) + "_";
-                default:
-                    return escapeReservedCharacters(nullToEmpty(element.text())) + htmlToMarkdown(element.children());
-            }
+            return switch (element.tag().getName().toLowerCase()) {
+                case "a" -> String.format(" [%s](%s)", escapeReservedCharacters(element.text()),
+                                          escapeReservedCharacters(element.attr("href")));
+                case "b" -> "*" + escapeReservedCharacters(nullToEmpty(element.text())) +
+                            htmlToMarkdown(element.children()) + "*";
+                case "i" -> "_" + escapeReservedCharacters(nullToEmpty(element.text())) +
+                            htmlToMarkdown(element.children()) + "_";
+                default -> escapeReservedCharacters(nullToEmpty(element.text())) + htmlToMarkdown(element.children());
+            };
         }
     }
 

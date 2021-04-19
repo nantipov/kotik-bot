@@ -1,9 +1,5 @@
 package org.nantipov.kotikbot.domain;
 
-import lombok.Value;
+public record CollectedMessage(RoomLanguage language, boolean beta, SupplierMessage message) {
 
-@Value
-public class CollectedMessage {
-    RoomLanguage language;
-    SupplierMessage message;
 }

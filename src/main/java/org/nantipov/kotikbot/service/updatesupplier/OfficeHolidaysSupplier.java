@@ -50,7 +50,7 @@ public class OfficeHolidaysSupplier implements UpdateSupplier {
                                    updatesService.storeUpdate(
                                            SUPPLIER_ID, updateKey, today.plusHours(23).plusMinutes(59),
                                            new CollectedMessages(
-                                                   List.of(new CollectedMessage(RoomLanguage.EN, message))
+                                                   List.of(new CollectedMessage(RoomLanguage.EN, false, message))
                                            )
                                    )
                 );

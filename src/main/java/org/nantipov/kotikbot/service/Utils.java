@@ -15,7 +15,7 @@ public class Utils {
     }
 
     public static String escapeReservedCharacters(String markdownText) {
-        //TODO optimize
+        //TODO optimize and make telegram specific
         return markdownText.chars()
                            .mapToObj(charCode -> {
                                          if (MARKDOWN_RESERVED_CHARACTERS.contains((char) charCode)) {

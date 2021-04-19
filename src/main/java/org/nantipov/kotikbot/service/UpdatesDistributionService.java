@@ -2,11 +2,12 @@ package org.nantipov.kotikbot.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.nantipov.kotikbot.domain.CollectedMessage;
 import org.nantipov.kotikbot.domain.CollectedMessages;
-import org.nantipov.kotikbot.domain.RoomLanguage;
+import org.nantipov.kotikbot.domain.RoomSettings;
 import org.nantipov.kotikbot.domain.SupplierMessage;
 import org.nantipov.kotikbot.domain.entity.CollectedUpdate;
 import org.nantipov.kotikbot.domain.entity.DistributedUpdate;
@@ -85,10 +86,6 @@ public class UpdatesDistributionService {
         }
         try {
             var collectedMessages = objectMapper.readValue(update.getMessagesJson(), CollectedMessages.class);
-            var messageLanguages = collectedMessages.getMessages()
-                                                    .stream()
-                                                    .map(CollectedMessage::getLanguage)
-                                                    .collect(Collectors.toSet());
             var unreachedRooms = roomRepository.findUnreachedChats(update.getId());
             if (unreachedRooms.isEmpty()) {
                 return;
@@ -101,35 +98,39 @@ public class UpdatesDistributionService {
                           )
                           .forEach(room -> sendUpdateToUnreachedRoom(
                                   room, update,
-                                  getMessagesByLanguages(collectedMessages,
-                                                         roomSettingsService
-                                                                 .getSettingsFromString(room.getSettingsJson())
-                                                                 .getLanguages())
-                                   )
+                                  getMessagesByRoomSettings(
+                                          collectedMessages,
+                                          roomSettingsService.getSettingsFromString(room.getSettingsJson())
+                                  ))
                           );
         } catch (JsonProcessingException e) {
             log.error("Could not deserialize JSON {}", update.getMessagesJson(), e);
         }
     }
 
-    private List<SupplierMessage> getMessagesByLanguages(CollectedMessages collectedMessages,
-                                                         List<RoomLanguage> preferredLanguages) {
+    @VisibleForTesting
+    List<SupplierMessage> getMessagesByRoomSettings(
+            CollectedMessages collectedMessages, RoomSettings roomSettings) {
+        var preferredLanguages = roomSettings.getLanguages();
         var messageLanguages = collectedMessages.getMessages()
                                                 .stream()
-                                                .map(CollectedMessage::getLanguage)
+                                                .map(CollectedMessage::language)
                                                 .collect(Collectors.toSet());
         return preferredLanguages.stream()
                                  .sequential()
                                  .filter(messageLanguages::contains)
                                  .findFirst()
                                  .stream()
-                                 .flatMap(chosenLanguage ->
-                                                  collectedMessages.getMessages()
-                                                                   .stream()
-                                                                   .filter(message -> message.getLanguage() ==
-                                                                                      chosenLanguage)
+                                 .flatMap(
+                                         chosenLanguage ->
+                                                 collectedMessages.getMessages()
+                                                                  .stream()
+                                                                  .filter(msg -> msg.language() == chosenLanguage)
                                  )
-                                 .map(CollectedMessage::getMessage)
+                                 .filter(collectedMessage ->
+                                                 !collectedMessage.beta() || roomSettings.getAcceptBetaFeatures()
+                                 )
+                                 .map(CollectedMessage::message)
                                  .collect(Collectors.toList());
     }
 
@@ -146,13 +147,13 @@ public class UpdatesDistributionService {
         roomRepository.save(room);
     }
 
-    private void sendMessage(Room room, SupplierMessage message) { //TODO visitor?
+    private void sendMessage(Room room, SupplierMessage message) {
         switch (room.getProvider()) {
             case TELEGRAM:
                 try {
                     telegramBot.sendSupplierMessage(message, room.getProviderRoomKey());
                 } catch (TelegramApiException e) {
-                    log.error("Could not send Telegram message, skipped", e); //TODO skipped?
+                    log.error("Could not send Telegram message, skipped", e);
                 }
                 break;
             default:
