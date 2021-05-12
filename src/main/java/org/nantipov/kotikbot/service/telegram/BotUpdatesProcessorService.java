@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class BotUpdatesProcessorService { //TODO move to TelegramBot/Service?
+public class BotUpdatesProcessorService {
 
     private final RoomRequestService roomRequestService;
     private final RoomRepository roomRepository;

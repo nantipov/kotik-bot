@@ -13,7 +13,8 @@ import java.util.List;
 
 public class UpdatesDistributionServiceTest {
 
-    final UpdatesDistributionService service = new UpdatesDistributionService(null, null, null, null, null, null, 0);
+    private final UpdatesDistributionService service =
+            new UpdatesDistributionService(null, null, null, null, null, null, 0);
 
     @Test
     void filtersByLanguages() {
