@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: kotik-bot
-          image: nantipov/kotik-bot:master
+          image: <IMAGE>
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: production
