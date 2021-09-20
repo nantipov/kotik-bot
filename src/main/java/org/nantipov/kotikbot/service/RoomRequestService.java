@@ -9,7 +9,12 @@ import org.nantipov.kotikbot.domain.SupplierMessage;
 import org.nantipov.kotikbot.domain.entity.Room;
 import org.nantipov.kotikbot.respository.RoomRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +37,8 @@ public class RoomRequestService {
             PREDICATE_IS_ACTION.and(roomQuery -> roomQuery.getAction() == RoomAction.LANGUAGES);
     private static final Predicate<RoomQuery> PREDICATE_IS_BETA =
             PREDICATE_IS_ACTION.and(roomQuery -> roomQuery.getAction() == RoomAction.BETA);
+    private static final Predicate<RoomQuery> PREDICATE_IS_STATS =
+            PREDICATE_IS_ACTION.and(roomQuery -> roomQuery.getAction() == RoomAction.STATS);
 
     private final RoomSettingsService roomSettingsService;
     private final TranslationsService translationsService;
@@ -41,7 +48,8 @@ public class RoomRequestService {
             ProcessingRoute.of(PREDICATE_IS_ENG, query -> changeFirstLanguageHandler(query, RoomLanguage.EN)),
             ProcessingRoute.of(PREDICATE_IS_RUS, query -> changeFirstLanguageHandler(query, RoomLanguage.RU)),
             ProcessingRoute.of(PREDICATE_IS_LANGUAGES, this::changeLanguagesHandler),
-            ProcessingRoute.of(PREDICATE_IS_BETA, this::changeBetaFlag)
+            ProcessingRoute.of(PREDICATE_IS_BETA, this::changeBetaFlag),
+            ProcessingRoute.of(PREDICATE_IS_STATS, this::stats)
     );
 
     public RoomRequestService(RoomSettingsService roomSettingsService,
@@ -169,6 +177,38 @@ public class RoomRequestService {
         roomSettingsService.setFirstLanguage(room.getId(), language);
         return String.format(translationsService.translation("settings.language_set", language.getLocale()),
                              language.getDisplayName());
+    }
+
+    private RoomQueryResponse stats(RoomQuery query) {
+        var room = //TODO rework
+                roomRepository.findById(query.getRoomId())
+                              .orElseThrow(() -> new IllegalArgumentException(
+                                      "Unknown room " + query.getRoomId())
+                              );
+        var firstLanguage = roomSettingsService.getFirstLanguage(query.getRoomId());
+        var responseMessage = new SupplierMessage();
+
+        var version = "unknown";
+        try {
+            version = Files.readString(Paths.get(ResourceUtils.getURL("classpath:version").toURI()));
+        } catch (IOException | URISyntaxException e) {
+            // it is not necessary to handle it
+        }
+
+        var roomsQuantity = roomRepository.count();
+
+        var response = String.format(
+                translationsService.translation(
+                        "stats.response", firstLanguage.getLocale()
+                ),
+                version.trim(),
+                roomsQuantity
+        );
+        responseMessage.setMarkdownText(response);
+        return RoomQueryResponse.builder()
+                                .providerRoomKey(room.getProviderRoomKey())
+                                .message(responseMessage)
+                                .build();
     }
 
     @Value(staticConstructor = "of")

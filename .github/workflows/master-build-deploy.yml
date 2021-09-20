@@ -24,7 +24,8 @@ jobs:
           VERSION=pr-${{ github.event.number }}
         fi
         TAGS="${DOCKER_IMAGE}:${VERSION}"
-        IMAGE_SHA=${DOCKER_IMAGE}:sha-${GITHUB_SHA::8}
+        SHA=sha-${GITHUB_SHA::8}
+        IMAGE_SHA=${DOCKER_IMAGE}:${SHA}
         if [ "${{ github.event_name }}" = "push" ]; then
           TAGS="$TAGS,$IMAGE_SHA"
         fi
@@ -32,6 +33,7 @@ jobs:
         echo ::set-output name=version::${VERSION}
         echo ::set-output name=tags::${TAGS}
         echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+        echo "${SHA}" > $GITHUB_WORKSPACE/src/main/resources/version
 
     - name: Set up JDK 16
       uses: actions/setup-java@v1
