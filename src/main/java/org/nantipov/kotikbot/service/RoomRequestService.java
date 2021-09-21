@@ -202,12 +202,14 @@ public class RoomRequestService {
 
         var roomsQuantity = roomRepository.count();
 
-        var response = String.format(
-                translationsService.translation(
-                        "stats.response", firstLanguage.getLocale()
-                ),
-                version.trim(),
-                roomsQuantity
+        var response = Utils.escapeReservedCharacters(
+                String.format(
+                        translationsService.translation(
+                                "stats.response", firstLanguage.getLocale()
+                        ),
+                        version.trim(),
+                        roomsQuantity
+                )
         );
         responseMessage.setMarkdownText(response);
         return RoomQueryResponse.builder()
