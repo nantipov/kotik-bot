@@ -8,13 +8,13 @@ import org.nantipov.kotikbot.domain.RoomQueryResponse;
 import org.nantipov.kotikbot.domain.SupplierMessage;
 import org.nantipov.kotikbot.domain.entity.Room;
 import org.nantipov.kotikbot.respository.RoomRepository;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.channels.Channels;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +43,7 @@ public class RoomRequestService {
     private final RoomSettingsService roomSettingsService;
     private final TranslationsService translationsService;
     private final RoomRepository roomRepository;
+    private final ResourceLoader resourceLoader;
 
     private final List<ProcessingRoute> routes = List.of(
             ProcessingRoute.of(PREDICATE_IS_ENG, query -> changeFirstLanguageHandler(query, RoomLanguage.EN)),
@@ -54,10 +55,11 @@ public class RoomRequestService {
 
     public RoomRequestService(RoomSettingsService roomSettingsService,
                               TranslationsService translationsService,
-                              RoomRepository roomRepository) {
+                              RoomRepository roomRepository, ResourceLoader resourceLoader) {
         this.roomSettingsService = roomSettingsService;
         this.translationsService = translationsService;
         this.roomRepository = roomRepository;
+        this.resourceLoader = resourceLoader;
     }
 
     public Optional<RoomQueryResponse> process(RoomQuery roomQuery) {
@@ -189,9 +191,12 @@ public class RoomRequestService {
         var responseMessage = new SupplierMessage();
 
         var version = "unknown";
-        try {
-            version = Files.readString(Paths.get(ResourceUtils.getURL("classpath:version").toURI()));
-        } catch (IOException | URISyntaxException e) {
+        try (var versionReader = new BufferedReader(Channels.newReader(
+                resourceLoader.getResource("classpath:version").readableChannel(),
+                StandardCharsets.UTF_8))
+        ) {
+            version = versionReader.readLine().trim();
+        } catch (IOException e) {
             // it is not necessary to handle it
         }
 
