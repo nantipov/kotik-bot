@@ -1,4 +1,4 @@
-FROM openjdk:16-jdk-slim
+FROM openjdk:17-jdk-slim
 
 COPY build/libs/kotik-bot-0.0.1-SNAPSHOT.jar /service.jar
 
