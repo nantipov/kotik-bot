@@ -46,7 +46,7 @@ dependencies {
     runtimeOnly 'org.postgresql:postgresql'
 
     implementation 'com.github.ben-manes.caffeine:caffeine:3.0.5'
-    implementation 'com.google.guava:guava:31.0.1-jre'
+    implementation 'com.google.guava:guava:31.1-jre'
     implementation 'com.rometools:rome:1.18.0'
 
     implementation "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
