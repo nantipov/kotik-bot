@@ -13,7 +13,7 @@ version = '0.0.1-SNAPSHOT'
 ext {
     jacksonVersion = '2.13.2'
     testContainersVersion = '1.17.2'
-    telegramVersion = '5.7.1'
+    telegramVersion = '6.0.1'
 }
 
 
