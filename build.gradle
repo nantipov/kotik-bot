@@ -11,7 +11,7 @@ group = 'org.nantipov'
 version = '0.0.1-SNAPSHOT'
 
 ext {
-    jacksonVersion = '2.13.2'
+    jacksonVersion = '2.13.3'
     testContainersVersion = '1.17.2'
     telegramVersion = '6.0.1'
 }
