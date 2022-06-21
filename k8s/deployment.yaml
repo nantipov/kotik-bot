@@ -44,9 +44,10 @@ spec:
               value: /tmp
           resources:
             requests:
-              cpu: 50m
-              memory: 100Mi
+              cpu: 400m
+              memory: 500Mi
             limits:
-              memory: 100Mi        
+              cpu: 400m
+              memory: 500Mi        
 
       
