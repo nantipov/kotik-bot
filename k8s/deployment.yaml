@@ -42,3 +42,12 @@ spec:
                   key: db_password
             - name: LOGGING_PATH
               value: /tmp
+          resources:
+            requests:
+              cpu: 400m
+              memory: 500Mi
+            limits:
+              cpu: 400m
+              memory: 500Mi        
+
+      

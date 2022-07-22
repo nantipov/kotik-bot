@@ -1,19 +1,19 @@
 plugins {
     id 'java'
 
-    id 'org.springframework.boot' version '2.6.6'
-    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'org.springframework.boot' version '2.7.2'
+    id 'io.spring.dependency-management' version '1.0.12.RELEASE'
 
-    id 'io.freefair.lombok' version '6.4.2'
+    id 'io.freefair.lombok' version '6.5.0.3'
 }
 
 group = 'org.nantipov'
 version = '0.0.1-SNAPSHOT'
 
 ext {
-    jacksonVersion = '2.13.2'
-    testContainersVersion = '1.17.1'
-    telegramVersion = '5.7.1'
+    jacksonVersion = '2.13.3'
+    testContainersVersion = '1.17.3'
+    telegramVersion = '6.1.0'
 }
 
 
@@ -45,7 +45,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.postgresql:postgresql'
 
-    implementation 'com.github.ben-manes.caffeine:caffeine:3.0.6'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.1'
     implementation 'com.google.guava:guava:31.1-jre'
     implementation 'com.rometools:rome:1.18.0'
 
@@ -53,7 +53,7 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
     implementation "com.fasterxml.jackson.module:jackson-modules-java8:${jacksonVersion}"
-    implementation 'org.jsoup:jsoup:1.14.3'
+    implementation 'org.jsoup:jsoup:1.15.2'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
