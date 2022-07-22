@@ -9,6 +9,7 @@ public enum RoomAction {
     RUS("Сменить первый язык на Русский"),
     BETA("I accept beta features"),
     STATS("Show statistics"),
+    PEEK("Peek a topic based on geography"),
     //    HELP("Help message"),
     //    TIMEZONE("Timezone - <City>"),
     UNKNOWN("n/a");

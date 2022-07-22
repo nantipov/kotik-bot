@@ -39,27 +39,33 @@ public class RoomRequestService {
             PREDICATE_IS_ACTION.and(roomQuery -> roomQuery.getAction() == RoomAction.BETA);
     private static final Predicate<RoomQuery> PREDICATE_IS_STATS =
             PREDICATE_IS_ACTION.and(roomQuery -> roomQuery.getAction() == RoomAction.STATS);
+    private static final Predicate<RoomQuery> PREDICATE_IS_PEEK =
+            PREDICATE_IS_ACTION.and(roomQuery -> roomQuery.getAction() == RoomAction.PEEK);
 
     private final RoomSettingsService roomSettingsService;
     private final TranslationsService translationsService;
     private final RoomRepository roomRepository;
     private final ResourceLoader resourceLoader;
 
-    private final List<ProcessingRoute> routes = List.of(
-            ProcessingRoute.of(PREDICATE_IS_ENG, query -> changeFirstLanguageHandler(query, RoomLanguage.EN)),
-            ProcessingRoute.of(PREDICATE_IS_RUS, query -> changeFirstLanguageHandler(query, RoomLanguage.RU)),
-            ProcessingRoute.of(PREDICATE_IS_LANGUAGES, this::changeLanguagesHandler),
-            ProcessingRoute.of(PREDICATE_IS_BETA, this::changeBetaFlag),
-            ProcessingRoute.of(PREDICATE_IS_STATS, this::stats)
-    );
+    private final List<ProcessingRoute> routes;
 
     public RoomRequestService(RoomSettingsService roomSettingsService,
                               TranslationsService translationsService,
-                              RoomRepository roomRepository, ResourceLoader resourceLoader) {
+                              RoomRepository roomRepository, ResourceLoader resourceLoader,
+                              PeekQueryService peekQueryService) {
         this.roomSettingsService = roomSettingsService;
         this.translationsService = translationsService;
         this.roomRepository = roomRepository;
         this.resourceLoader = resourceLoader;
+
+        routes = List.of(
+                ProcessingRoute.of(PREDICATE_IS_ENG, query -> changeFirstLanguageHandler(query, RoomLanguage.EN)),
+                ProcessingRoute.of(PREDICATE_IS_RUS, query -> changeFirstLanguageHandler(query, RoomLanguage.RU)),
+                ProcessingRoute.of(PREDICATE_IS_LANGUAGES, this::changeLanguagesHandler),
+                ProcessingRoute.of(PREDICATE_IS_BETA, this::changeBetaFlag),
+                ProcessingRoute.of(PREDICATE_IS_STATS, this::stats),
+                ProcessingRoute.of(PREDICATE_IS_PEEK, peekQueryService::peek)
+        );
     }
 
     public Optional<RoomQueryResponse> process(RoomQuery roomQuery) {
@@ -71,11 +77,7 @@ public class RoomRequestService {
     }
 
     private RoomQueryResponse changeBetaFlag(RoomQuery query) {
-        var room = //TODO rework
-                roomRepository.findById(query.getRoomId())
-                              .orElseThrow(() -> new IllegalArgumentException(
-                                      "Unknown room " + query.getRoomId())
-                              );
+        var room = getRoom(query.getRoomId());
         var firstLanguage = roomSettingsService.getFirstLanguage(query.getRoomId());
         var responseMessage = new SupplierMessage();
         if (!query.getArgs().isEmpty() &&
@@ -97,11 +99,7 @@ public class RoomRequestService {
     }
 
     private RoomQueryResponse changeFirstLanguageHandler(RoomQuery query, RoomLanguage language) {
-        var room = //TODO rework
-                roomRepository.findById(query.getRoomId())
-                              .orElseThrow(() -> new IllegalArgumentException(
-                                      "Unknown room " + query.getRoomId())
-                              );
+        var room = getRoom(query.getRoomId());
         var response = changeFirstLanguage(room, language);
         var responseMessage = new SupplierMessage();
         responseMessage.setMarkdownText(response);
@@ -112,12 +110,7 @@ public class RoomRequestService {
     }
 
     private RoomQueryResponse changeLanguagesHandler(RoomQuery query) {
-        var room = //TODO rework
-                roomRepository.findById(query.getRoomId())
-                              .orElseThrow(() -> new IllegalArgumentException(
-                                      "Unknown room " + query.getRoomId())
-                              );
-
+        var room = getRoom(query.getRoomId());
         var availableLanguagesHelp =
                 Arrays.stream(RoomLanguage.values())
                       .map(
@@ -182,11 +175,7 @@ public class RoomRequestService {
     }
 
     private RoomQueryResponse stats(RoomQuery query) {
-        var room = //TODO rework
-                roomRepository.findById(query.getRoomId())
-                              .orElseThrow(() -> new IllegalArgumentException(
-                                      "Unknown room " + query.getRoomId())
-                              );
+        var room = getRoom(query.getRoomId());
         var firstLanguage = roomSettingsService.getFirstLanguage(query.getRoomId());
         var responseMessage = new SupplierMessage();
 
@@ -216,6 +205,13 @@ public class RoomRequestService {
                                 .providerRoomKey(room.getProviderRoomKey())
                                 .message(responseMessage)
                                 .build();
+    }
+
+    private Room getRoom(long roomId) {
+        return roomRepository.findById(roomId)
+                             .orElseThrow(() -> new IllegalArgumentException(
+                                     "Unknown room " + roomId)
+                             );
     }
 
     @Value(staticConstructor = "of")
