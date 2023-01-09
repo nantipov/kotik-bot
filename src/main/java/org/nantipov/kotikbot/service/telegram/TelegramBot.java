@@ -142,7 +142,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private void sayThatIAmTyping(String chatId) {
         try {
-            execute(new SendChatAction(chatId, "typing"));
+            execute(SendChatAction.builder().chatId(chatId).action("typing").build());
         } catch (TelegramApiException e) {
             log.warn("Could not send 'typing' event", e);
         }
