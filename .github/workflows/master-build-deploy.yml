@@ -81,5 +81,5 @@ jobs:
       run: kubectl apply -f $GITHUB_WORKSPACE/k8s/deployment.yaml
 
     - name: Verify deployment
-      run: kubectl rollout status deployment/kotik-bot-deployment
+      run: kubectl rollout status deployment/kotik-bot
 

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kotik-bot-deployment
+  name: kotik-bot
   labels:
     app: kotik-bot
 spec:
@@ -48,6 +48,5 @@ spec:
               memory: 500Mi
             limits:
               cpu: 400m
-              memory: 500Mi        
+              memory: 500Mi
 
-      
