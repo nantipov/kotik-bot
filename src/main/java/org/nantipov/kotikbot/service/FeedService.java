@@ -1,5 +1,6 @@
 package org.nantipov.kotikbot.service;
 
+import com.google.common.net.HttpHeaders;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
@@ -56,6 +57,7 @@ public class FeedService {
                                         Function<SyndEntry, SupplierMessage> mapper) {
         try (CloseableHttpClient client = HttpClients.createMinimal()) {
             HttpUriRequest request = new HttpGet(url);
+            request.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0");
             try (var response = client.execute(request);
                  var stream = response.getEntity().getContent()) {
                 var input = new SyndFeedInput();
