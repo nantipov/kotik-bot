@@ -1,6 +1,7 @@
 package org.nantipov.kotikbot.service.updatesupplier;
 
 import com.google.common.base.Charsets;
+import com.google.common.net.HttpHeaders;
 import com.rometools.rome.feed.synd.SyndEntry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.HttpGet;
@@ -131,6 +132,7 @@ public class WikipediaSupplier implements UpdateSupplier {
         String fullUrl = WIKI_BASE_URL + url;
         try (CloseableHttpClient client = HttpClients.createMinimal()) {
             HttpUriRequest request = new HttpGet(fullUrl);
+            request.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0"); //todo: code duplicate mozilla
             try (var response = client.execute(request);
                  var stream = response.getEntity().getContent()) {
                 var doc = Jsoup.parse(stream, Charsets.UTF_8.name(), url);
@@ -139,6 +141,7 @@ public class WikipediaSupplier implements UpdateSupplier {
                           .filter(a -> getThumbnailSize(a.text()) <= 2500)
                           .sorted(Comparator.<Element>comparingInt(e -> getThumbnailSize(e.text())).reversed())
                           .limit(1)
+                          .peek(a -> System.out.println(a.attr("href")))
                           .map(a -> new MessageResource(
                                   MessageResourceType.IMAGE,
                                   a.attr("href"),

@@ -1,6 +1,12 @@
 package org.nantipov.kotikbot.service.telegram;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.nantipov.kotikbot.domain.MessageResource;
 import org.nantipov.kotikbot.domain.RoomAction;
 import org.nantipov.kotikbot.domain.SupplierMessage;
@@ -19,6 +25,8 @@ import org.telegram.telegrambots.meta.api.objects.media.InputMedia;
 import org.telegram.telegrambots.meta.api.objects.media.InputMediaPhoto;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
+
+import com.google.common.net.HttpHeaders;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +49,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     public TelegramBot(@Value("${telegram.token}") String token,
                        @Value("${bot.name}") String name,
                        BotUpdatesProcessorService botUpdatesProcessorService) {
+                        super(token);
         this.token = token;
         this.name = name;
         this.botUpdatesProcessorService = botUpdatesProcessorService;
@@ -162,10 +171,15 @@ public class TelegramBot extends TelegramLongPollingBot {
     private static class TelegramInputFileResource implements AutoCloseable {
         private final InputFile telegramFile;
         private final InputStream in;
+        private final CloseableHttpClient client = HttpClients.createMinimal();
+        private CloseableHttpResponse response; //todo: possible race condition?
 
         private TelegramInputFileResource(MessageResource messageResource) {
             try {
-                in = new URL(messageResource.getUrl()).openStream();
+                HttpUriRequest request = new HttpGet(messageResource.getUrl());
+                request.setHeader(HttpHeaders.USER_AGENT, "Mozilla/5.0"); //todo: code duplicate mozilla
+                response = client.execute(request);
+                in = response.getEntity().getContent();
                 telegramFile = new InputFile(in, "file-" + UUID.randomUUID().toString() + ".dat");
             } catch (IOException e) {
                 throw new IllegalArgumentException("Could not prepare file " + messageResource);
@@ -180,6 +194,8 @@ public class TelegramBot extends TelegramLongPollingBot {
         public void close() {
             try {
                 in.close();
+                response.close();
+                client.close();
             } catch (IOException e) {
 
             }
